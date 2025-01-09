@@ -4,6 +4,8 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
 import time
 import pandas as pd
@@ -14,8 +16,7 @@ import random
 #takes a long time to run, so not super useful in that way.
 
 #select desired pages
-#page_start = 1
-#page_end = 5
+pages = 50
 
 #Realtor.com rentals URL
 start_url = 'https://www.realtor.com/apartments/Chicago_IL/'
@@ -27,37 +28,35 @@ ua = UserAgent()
 options = Options()
 options.set_preference("general.useragent.override", ua.random)
 
-#set up a proxy, use firefox history + extensions, reset value of navigator.webdriver
+#set up a proxy, and choose from a list to evade blocking 
 proxy_host_list = ["199.60.103.160","104.19.138.4","104.16.109.207","104.17.248.164","104.23.126.8","104.25.87.42"]
 proxy_port = '80'
 options.set_preference("network.proxy.type", 1)
 proxy_host = random.choice(proxy_host_list)
 options.set_preference("network.proxy.http", proxy_host)
 options.set_preference("network.proxy.http_port", int(proxy_port))
+#use firefox history + extensions, reset value of navigator.webdriver, disable tracking protection
 options.set_preference("dom.webdriver.enabled", False)
 options.set_preference('useAutomationExtension', False)
 options.set_preference("privacy.trackingprotection.enabled", False)
 
-#firefox driver, make sure it's in path 
+#setupfirefox driver, make sure it's in path 
 driver = webdriver.Firefox(options=options)
 #change page size
 width = 1920
 height = 1080
 driver.set_window_size(width,height)
-
+#load page
 driver.get(start_url)
 time.sleep(random.uniform(5, 10))
+
 #set up action chaings for mouse click
 actions = ActionChains(driver)
 
 #loop through pages
-#for page in range(page_start,page_end+1):
-while True:
+for page in range(1,pages+1):
     try:
-        #print(f'Scraping page {page}...')
-        print('Scraping page...')
-        #url = start_url.format(page)
-        #driver.get(url)
+        print(f'Scraping page {page}...')
 
         #let page load randomly
         time.sleep(random.uniform(5,15))
@@ -107,11 +106,12 @@ while True:
                     'Bath': bath,
                     'Sqft': sqft,
                     'Name': name.text.strip() if price else None,
-                    'Address': address.text.strip() if price else None
+                    'Address': address.text.strip() if price else None,
+                    'Page': page
                 })
         
         #click the next page button
-        next_button = driver.find_element(By.CLASS_NAME,'Next')
+        next_button = WebDriverWait(driver, 40).until(EC.element_to_be_clickable((By.LINK_TEXT, "Next")))
         if next_button:
             next_button.click()
         else:
@@ -131,12 +131,13 @@ driver.quit()
 
 #output to dataframe and csv
 df = pd.DataFrame(all_listings)
-#df.to_csv(f'chicago_apartment_rentals_pages_{page_start}-{page_end}.csv')
-df.to_csv(f'chicago_apartment_rentals_pages.csv')
+df.to_csv(f'jan_8_chicago_apartment_rentals_pages_1-{pages}.csv')
 #checks
 print('first 50 rows:')
-print(df.head(50))
+print(df.head(10))
 print('last 50 rows:')
-print(df.tail(50))
+print(df.tail(10))
 print('Row Counts per Column:')
 print(df.count())
+print('Found Listings Per page:')
+print(df["Price"].count()/pages)
