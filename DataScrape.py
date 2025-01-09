@@ -80,6 +80,7 @@ for page in range(1,pages+1):
             listings = correct_listings.find_all('div',recursive=False)
             for listing in listings:
                 price = listing.find('span', class_ = 'base__StyledType-rui__sc-108xfm0-0 cfGYDq')
+                rent_type = listing.find('div', class_ = 'base__StyledType-rui__sc-108xfm0-0 cWxXjc message')
                 name = listing.find('div', class_ = 'truncate-line',attrs={'data-testid':'card-address-1'})
                 address = listing.find('div',class_ = 'truncate-line',attrs={'data-testid':'card-address-2'})
                 ul_element = listing.find('ul')
@@ -105,8 +106,9 @@ for page in range(1,pages+1):
                     'Beds': beds,
                     'Bath': bath,
                     'Sqft': sqft,
-                    'Name': name.text.strip() if price else None,
-                    'Address': address.text.strip() if price else None,
+                    'Type': rent_type.text.strip() if price else None,
+                    'Name': name.text.strip() if name else None,
+                    'Address': address.text.strip() if address else None,
                     'Page': page
                 })
         
