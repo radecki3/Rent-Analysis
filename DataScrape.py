@@ -14,12 +14,14 @@ import random
 #meant to be a one time script to fetch the desired data.
 #could be turned into a function but repeated requests will get you blocked and this
 #takes a long time to run, so not super useful in that way.
+#running this with too many pages will cause a memory crash, I like to do intervals of 50. 
 
 #select desired pages
-pages = 50
+page_start = 150
+page_end = 200
 
 #Realtor.com rentals URL
-start_url = 'https://www.realtor.com/apartments/Chicago_IL/'
+start_url = f'https://www.realtor.com/apartments/Chicago_IL/pg-{page_start}/'
 
 all_listings = []
 
@@ -54,7 +56,7 @@ time.sleep(random.uniform(5, 10))
 actions = ActionChains(driver)
 
 #loop through pages
-for page in range(1,pages+1):
+for page in range(page_start,page_end+1):
     try:
         print(f'Scraping page {page}...')
 
@@ -63,7 +65,7 @@ for page in range(1,pages+1):
 
         #mouse movement
         #actions.move_by_offset(random.randint(-100,100),random.randint(-100,100)).perform()
-        time.sleep(0.5)
+        #time.sleep(0.5)
 
         #smooth scrolling
         total_height = int(driver.execute_script("return document.body.scrollHeight"))
@@ -74,7 +76,8 @@ for page in range(1,pages+1):
         #scrape data
         soup = BeautifulSoup(driver.page_source,'html.parser')
         #filter out the desired listings
-        correct_listings = soup.find('section', class_ = 'PropertiesList_propertiesContainer__Vox4I PropertiesList_listViewGrid__bttyS')
+        #correct_listings = soup.find('section', class_ = 'PropertiesList_propertiesContainer__Vox4I PropertiesList_listViewGrid__bttyS')
+        correct_listings = soup.find('section', class_ = 'PropertiesList_propertiesContainer__HTNbx PropertiesList_listViewGrid__U_BlK') #this gets changed every so often
         #extract all the useful info
         if correct_listings:
             listings = correct_listings.find_all('div',recursive=False)
@@ -133,7 +136,7 @@ driver.quit()
 
 #output to dataframe and csv
 df = pd.DataFrame(all_listings)
-df.to_csv(f'jan_8_chicago_apartment_rentals_pages_1-{pages}.csv')
+df.to_csv(f'chicago_apartment_rentals_pages_{page_start}-{page_end}.csv')
 #checks
 print('first 50 rows:')
 print(df.head(10))
@@ -142,4 +145,4 @@ print(df.tail(10))
 print('Row Counts per Column:')
 print(df.count())
 print('Found Listings Per page:')
-print(df["Price"].count()/pages)
+print(df["Price"].count()/(page_end-page_start))
