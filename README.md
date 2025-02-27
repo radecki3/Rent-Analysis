@@ -9,6 +9,7 @@ I also aim to compare the cities' overall statistics against each other to hopef
 The data is gathered from popular realtor site, Realtor.com, which hosts apartment listings similar to Zillow or Apartments.com. 
 
 I obtain data via webscraping in Python, which is the DataScrape.py file. Webscraping is a gray area, however, all data used is very easily accessible public data, and is not limited to only one website, so I feel that this is a fair use case. 
+
 *Note: this is a script and is not necessarily meant to be implemented in any wider or regular use cases. It is simply meant to serve as a one-time use for myself to gather the required data. As such, some of the code is inefficient and, in fact, purposefully omits some data-cleaning-esque steps in an effort to perform these with SQL instead. Furthurmore, the class names and general HTML structure utilized for the scraping procedure will vary widely from website to website, and can even change within a particular website from day-to-day or week-to-week.*
 
 The data amounts to ~ 5000-10000 listings per city (before some reduandant listings are filtered out) as I scrape only the first 200 pages, or less, of listings - around where realtor.com stops loading more pages. The smaller the city, the fewer rentals there are, naturally. 
